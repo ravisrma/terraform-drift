@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Terraform Drift Dashboard</title>
+  <style>
+    body { font-family: Arial; }
+    .clean { color: green; }
+    .drift { color: red; }
+    .remediated { color: orange; }
+  </style>
+</head>
+<body>
+<h1>Terraform Drift Dashboard</h1>
+<div id="content"></div>
+
+<script>
+async function load() {
+  const envs = ["dev","preprod","prod"];
+  let output = "";
+  for (let env of envs) {
+    let res = await fetch(env + ".json");
+    let data = await res.json();
+    output += `<p><b>${env}</b> :
+      <span class="${data.status}">${data.status}</span>
+      (Last run: ${data.last_run_utc})</p>`;
+  }
+  document.getElementById("content").innerHTML = output;
+}
+load();
+</script>
+</body>
+</html>

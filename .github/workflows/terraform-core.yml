@@ -1,0 +1,100 @@
+name: Terraform Core
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      auto_apply:
+        required: true
+        type: boolean
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+      issues: write
+      pull-requests: write
+
+    env:
+      TF_BUCKET: terraform-drift-005
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ inputs.region }}
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BUCKET}" \
+            -backend-config="key=${{ inputs.environment }}/${{ inputs.region }}/terraform.tfstate" \
+            -backend-config="region=${{ inputs.region }}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var-file=stage_variable/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -detailed-exitcode \
+            -no-color -out=tfplan > plan.txt
+
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
+
+      # 🚨 Slack Alert
+      - name: Slack Alert
+        if: steps.plan.outputs.exitcode == '2'
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"🚨 Drift detected in ${{ inputs.environment }}\"}" \
+          ${{ secrets.SLACK_WEBHOOK }}
+
+      # 📝 Create Issue
+      - name: Create Drift Issue
+        if: steps.plan.outputs.exitcode == '2'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "🚨 Drift - ${{ inputs.environment }}",
+              body: "Drift detected.\n\nCheck workflow logs."
+            })
+
+      # 🤖 AUTO REMEDIATION (NON PROD)
+      - name: Terraform Apply (Auto Remediation)
+        if: steps.plan.outputs.exitcode == '2' && inputs.auto_apply == true
+        run: terraform apply -auto-approve tfplan
+
+      # 📊 Update Drift Dashboard JSON
+      - name: Update Dashboard Data
+        run: |
+          mkdir -p dashboard
+          echo "{
+            \"environment\": \"${{ inputs.environment }}\",
+            \"region\": \"${{ inputs.region }}\",
+            \"drift\": \"${{ steps.plan.outputs.exitcode }}\",
+            \"timestamp\": \"$(date -u)\"
+          }" > dashboard/${{ inputs.environment }}.json
+
+      - name: Commit Dashboard
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add dashboard/
+          git commit -m "Update drift dashboard"
+          git push || echo "No changes"
