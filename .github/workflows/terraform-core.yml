@@ -27,7 +27,7 @@ jobs:
       issues: write
     defaults:
       run:
-        working-directory: .
+        working-directory: terraform
     env:
       TF_BUCKET: terraform-drift-005
 
