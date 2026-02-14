@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - 'dashboard/**'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Drift NonProd", "Drift Prod"]
+    types:
+      - completed
 
 permissions:
   contents: write
@@ -15,6 +20,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
     environment:
       name: github-pages
