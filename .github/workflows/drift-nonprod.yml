@@ -17,6 +17,7 @@ jobs:
       MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
   preprod:
+    needs: dev
     uses: ./.github/workflows/terraform-core.yml
     with:
       environment: preprod
