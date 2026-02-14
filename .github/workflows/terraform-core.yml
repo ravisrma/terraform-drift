@@ -12,6 +12,13 @@ on:
       auto_apply:
         required: true
         type: boolean
+    secrets:
+      AWS_ROLE:
+        required: true
+      SLACK_WEBHOOK:
+        required: false
+      MY_GITHUB_TOKEN:
+        required: true
 
 jobs:
   terraform:
@@ -257,4 +264,4 @@ jobs:
         if: steps.plan.outputs.exitcode == '1'
         run: |
           echo "::error::Terraform plan failed."
-          exit 1            
+          exit 1
