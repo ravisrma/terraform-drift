@@ -1,4 +1,6 @@
 {
-  "status": "clean",
-  "last_run_utc": "2026-02-14T12:00:00Z"
+  "environment": "dev",
+  "region": "ap-south-1",
+  "drift": "2",
+  "timestamp": "Sat Feb 14 10:25:23 UTC 2026"
 }
