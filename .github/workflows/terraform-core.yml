@@ -321,6 +321,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
+          git fetch origin main
+          git reset --soft origin/main
           git add ../dashboard/
-          git commit -m "Update drift dashboard" || echo "No changes to commit"
+          git commit -m "Update drift dashboard - ${{ inputs.environment }}" || echo "No changes to commit"
           git push || echo "No changes to push"         
