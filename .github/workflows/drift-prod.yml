@@ -9,5 +9,7 @@ jobs:
     with:
       environment: prod
       region: ap-south-1
-      auto_apply: false
-    secrets: inherit
+    secrets:
+      AWS_ROLE: ${{ secrets.AWS_ROLE }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}    

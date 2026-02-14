@@ -16,10 +16,12 @@ jobs:
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
-#   preprod:
-#     uses: ./.github/workflows/terraform-core.yml
-#     with:
-#       environment: preprod
-#       region: ap-south-1
-#       auto_apply: true
-#     secrets: inherit
+  preprod:
+    uses: ./.github/workflows/terraform-core.yml
+    with:
+      environment: preprod
+      region: ap-south-1
+    secrets:
+      AWS_ROLE: ${{ secrets.AWS_ROLE }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

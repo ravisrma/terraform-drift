@@ -282,11 +282,36 @@ jobs:
       - name: Update Dashboard Data
         run: |
           mkdir -p ../dashboard
+          
+          # Determine status based on exit code and apply outcome
+          EXIT_CODE="${{ steps.plan.outputs.exitcode }}"
+          APPLY_OUTCOME="${{ steps.apply.outcome }}"
+          
+          if [ "$EXIT_CODE" == "0" ]; then
+            STATUS="clean"
+          elif [ "$EXIT_CODE" == "2" ] && [ "$APPLY_OUTCOME" == "success" ]; then
+            STATUS="remediated"
+          elif [ "$EXIT_CODE" == "2" ]; then
+            STATUS="drift"
+          else
+            STATUS="error"
+          fi
+          
+          # Get timestamp in IST (UTC+5:30)
+          IST_TIMESTAMP=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')
+          
           echo "{
             \"environment\": \"${{ inputs.environment }}\",
             \"region\": \"${{ inputs.region }}\",
+            \"status\": \"${STATUS}\",
             \"drift\": \"${{ steps.plan.outputs.exitcode }}\",
-            \"timestamp\": \"$(date -u)\"
+            \"apply_outcome\": \"${APPLY_OUTCOME:-N/A}\",
+            \"timestamp\": \"${IST_TIMESTAMP}\",
+            \"workflow_run\": \"${{ github.run_id }}\",
+            \"workflow_url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
+            \"triggered_by\": \"${{ github.actor }}\",
+            \"branch\": \"${{ github.ref_name }}\",
+            \"commit_sha\": \"${{ github.sha }}\"
           }" > ../dashboard/${{ inputs.environment }}.json
 
       - name: Commit Dashboard
