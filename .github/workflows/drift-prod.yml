@@ -5,7 +5,6 @@ on:
 
 jobs:
   prod:
-    environment: prod
     uses: ./.github/workflows/terraform-core.yml
     with:
       environment: prod
