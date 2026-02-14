@@ -68,7 +68,7 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan \
-            -var-file=./stage_variable/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -var-file=./stage_variables/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
             -var="aws_region=${{ inputs.region }}" \
             -var="environment=${{ inputs.environment }}" \
             -out=tfplan

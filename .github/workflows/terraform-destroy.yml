@@ -60,7 +60,7 @@ jobs:
       - name: Terraform Plan Destroy
         run: |
           terraform plan -destroy \
-            -var-file=./stage_variable/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -var-file=./stage_variables/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
             -var="aws_region=${{ inputs.region }}" \
             -var="environment=${{ inputs.environment }}" \
             -out=tfplan-destroy

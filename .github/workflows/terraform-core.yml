@@ -22,16 +22,21 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
-
+    defaults:
+      run:
+        working-directory: terraform
     env:
       TF_BUCKET: terraform-drift-005
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ inputs.region }}
@@ -48,7 +53,7 @@ jobs:
         id: plan
         run: |
           terraform plan \
-            -var-file=stage_variable/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -var-file=./stage_variables/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
             -detailed-exitcode \
             -no-color -out=tfplan > plan.txt
 
