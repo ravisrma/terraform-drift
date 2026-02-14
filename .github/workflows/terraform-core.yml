@@ -9,9 +9,6 @@ on:
       region:
         required: true
         type: string
-      auto_apply:
-        required: true
-        type: boolean
     secrets:
       AWS_ROLE:
         required: true
@@ -25,13 +22,11 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write
-      contents: write
+      contents: read
       issues: write
-      pull-requests: write
     defaults:
       run:
-        working-directory: terraform
+        working-directory: .
     env:
       TF_BUCKET: terraform-drift-005
 
