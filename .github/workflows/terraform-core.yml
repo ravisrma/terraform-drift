@@ -277,3 +277,22 @@ jobs:
         run: |
           echo "::error::Terraform plan failed."
           exit 1
+
+      # 📊 Update Drift Dashboard JSON
+      - name: Update Dashboard Data
+        run: |
+          mkdir -p ../dashboard
+          echo "{
+            \"environment\": \"${{ inputs.environment }}\",
+            \"region\": \"${{ inputs.region }}\",
+            \"drift\": \"${{ steps.plan.outputs.exitcode }}\",
+            \"timestamp\": \"$(date -u)\"
+          }" > ../dashboard/${{ inputs.environment }}.json
+
+      - name: Commit Dashboard
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add ../dashboard/
+          git commit -m "Update drift dashboard"
+          git push || echo "No changes"         
