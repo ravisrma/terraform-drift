@@ -2,7 +2,7 @@ name: Drift NonProd
 
 on:
   schedule:
-    - cron: "1 * * * *"
+    - cron: "*/1 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -14,10 +14,10 @@ jobs:
       auto_apply: true
     secrets: inherit
 
-  preprod:
-    uses: ./.github/workflows/terraform-core.yml
-    with:
-      environment: preprod
-      region: ap-south-1
-      auto_apply: true
-    secrets: inherit
+#   preprod:
+#     uses: ./.github/workflows/terraform-core.yml
+#     with:
+#       environment: preprod
+#       region: ap-south-1
+#       auto_apply: true
+#     secrets: inherit
