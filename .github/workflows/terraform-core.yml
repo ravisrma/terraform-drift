@@ -135,6 +135,9 @@ jobs:
           terraform apply -auto-approve -no-color > apply_output.txt 2>&1
         continue-on-error: true
 
+      - name: Show Apply Output on Failure
+        if: steps.plan.outputs.exitcode == '2' && steps.apply.outcome == 'failure'
+        run: cat apply_output.txt        
       - name: Notify Slack - Drift Detected & Fixed
         if: steps.plan.outputs.exitcode == '2' && steps.apply.outcome == 'success'
         run: |
