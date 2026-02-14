@@ -66,6 +66,18 @@ jobs:
             -detailed-exitcode -no-color > plan_output.txt 2>&1
           EXIT_CODE=$?
           echo "exitcode=$EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          # Extract resource change counts from plan output
+          ADD_COUNT=$(grep -oP '\d+(?= to add)' plan_output.txt || echo "0")
+          CHANGE_COUNT=$(grep -oP '\d+(?= to change)' plan_output.txt || echo "0")
+          DESTROY_COUNT=$(grep -oP '\d+(?= to destroy)' plan_output.txt || echo "0")
+          TOTAL_DRIFT=$((${ADD_COUNT:-0} + ${CHANGE_COUNT:-0} + ${DESTROY_COUNT:-0}))
+          
+          echo "add_count=${ADD_COUNT:-0}" >> $GITHUB_OUTPUT
+          echo "change_count=${CHANGE_COUNT:-0}" >> $GITHUB_OUTPUT
+          echo "destroy_count=${DESTROY_COUNT:-0}" >> $GITHUB_OUTPUT
+          echo "total_drift=${TOTAL_DRIFT}" >> $GITHUB_OUTPUT
+          
           cat plan_output.txt
           exit 0  # Always succeed so workflow continues
 
@@ -304,7 +316,10 @@ jobs:
             \"environment\": \"${{ inputs.environment }}\",
             \"region\": \"${{ inputs.region }}\",
             \"status\": \"${STATUS}\",
-            \"drift\": \"${{ steps.plan.outputs.exitcode }}\",
+            \"drift_count\": \"${{ steps.plan.outputs.total_drift }}\",
+            \"resources_to_add\": \"${{ steps.plan.outputs.add_count }}\",
+            \"resources_to_change\": \"${{ steps.plan.outputs.change_count }}\",
+            \"resources_to_destroy\": \"${{ steps.plan.outputs.destroy_count }}\",
             \"apply_outcome\": \"${APPLY_OUTCOME:-N/A}\",
             \"timestamp\": \"${IST_TIMESTAMP}\",
             \"workflow_run\": \"${{ github.run_id }}\",

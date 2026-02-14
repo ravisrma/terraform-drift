@@ -268,7 +268,16 @@ function renderSummary(summary) {
 
 function renderEnvironments(results) {
   const container = document.getElementById('environments');
-  container.innerHTML = results.map(env => `
+  container.innerHTML = results.map(env => {
+    const driftCount = env.raw?.drift_count || '0';
+    const addCount = env.raw?.resources_to_add || '0';
+    const changeCount = env.raw?.resources_to_change || '0';
+    const destroyCount = env.raw?.resources_to_destroy || '0';
+    const applyOutcome = env.raw?.apply_outcome || 'N/A';
+    const workflowUrl = env.raw?.workflow_url || '';
+    const triggeredBy = env.raw?.triggered_by || 'N/A';
+    
+    return `
     <div class="env-card status-${env.status}">
       <div class="env-header">
         <span class="env-name">${env.environment}</span>
@@ -280,16 +289,33 @@ function renderEnvironments(results) {
           <div class="detail-value">📍 ${env.region}</div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">Status Code</div>
-          <div class="detail-value">${env.raw?.drift ?? 'N/A'}</div>
+          <div class="detail-label">Drift Count</div>
+          <div class="detail-value" style="font-size: 20px; font-weight: bold; color: ${driftCount > 0 ? '#ff5252' : '#00e676'}">${driftCount}</div>
         </div>
-        <div class="detail-item full-width">
+        <div class="detail-item">
+          <div class="detail-label">Resources</div>
+          <div class="detail-value">➕${addCount} 🔄${changeCount} 🗑️${destroyCount}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Apply Result</div>
+          <div class="detail-value">${applyOutcome === 'success' ? '✅' : applyOutcome === 'failure' ? '❌' : '➖'} ${applyOutcome}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Triggered By</div>
+          <div class="detail-value">👤 ${triggeredBy}</div>
+        </div>
+        <div class="detail-item">
           <div class="detail-label">Last Checked</div>
           <div class="detail-value">🕐 ${env.timestamp}</div>
         </div>
+        ${workflowUrl ? `
+        <div class="detail-item full-width">
+          <div class="detail-value"><a href="${workflowUrl}" target="_blank" style="color: #00d4ff; text-decoration: none;">🔗 View Workflow Run</a></div>
+        </div>
+        ` : ''}
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 loadDashboard();
