@@ -1,22 +1,22 @@
-# name: Drift NonProd
+name: Drift NonProd
 
-# on:
-#   schedule:
-#     - cron: "1 * * * *"
+on:
+  schedule:
+    - cron: "1 * * * *"
 
-# jobs:
-#   dev:
-#     uses: ./.github/workflows/terraform-core.yml
-#     with:
-#       environment: dev
-#       region: ap-south-1
-#       auto_apply: true
-#     secrets: inherit
+jobs:
+  dev:
+    uses: ./.github/workflows/terraform-core.yml
+    with:
+      environment: dev
+      region: ap-south-1
+      auto_apply: true
+    secrets: inherit
 
-#   preprod:
-#     uses: ./.github/workflows/terraform-core.yml
-#     with:
-#       environment: preprod
-#       region: ap-south-1
-#       auto_apply: true
-#     secrets: inherit
+  preprod:
+    uses: ./.github/workflows/terraform-core.yml
+    with:
+      environment: preprod
+      region: ap-south-1
+      auto_apply: true
+    secrets: inherit
