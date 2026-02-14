@@ -18,11 +18,17 @@ async function load() {
   const envs = ["dev","preprod","prod"];
   let output = "";
   for (let env of envs) {
-    let res = await fetch(env + ".json");
-    let data = await res.json();
-    output += `<p><b>${env}</b> :
-      <span class="${data.status}">${data.status}</span>
-      (Last run: ${data.last_run_utc})</p>`;
+    try {
+      let res = await fetch(env + ".json");
+      let data = await res.json();
+      // Map drift exitcode to status: 0=clean, 2=drift
+      let status = data.drift === "0" ? "clean" : "drift";
+      output += `<p><b>${env}</b> :
+        <span class="${status}">${status}</span>
+        (Last run: ${data.timestamp})</p>`;
+    } catch (e) {
+      output += `<p><b>${env}</b> : <span>No data</span></p>`;
+    }
   }
   document.getElementById("content").innerHTML = output;
 }
