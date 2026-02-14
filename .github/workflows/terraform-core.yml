@@ -35,18 +35,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ inputs.region }}
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.10.3
+          terraform_wrapper: false          
+
       - name: Terraform Init
         run: |
-          terraform init -reconfigure \
+          terraform init \
             -backend-config="bucket=${TF_BUCKET}" \
             -backend-config="key=${{ inputs.environment }}/${{ inputs.region }}/terraform.tfstate" \
             -backend-config="region=${{ inputs.region }}" \
@@ -56,7 +59,11 @@ jobs:
         id: plan
         run: |
           set +e  # Don't exit on error
-          terraform plan -detailed-exitcode -no-color > plan_output.txt 2>&1
+          terraform plan \
+            -var-file=./stage_variables/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -var="aws_region=${{ inputs.region }}" \
+            -var="environment=${{ inputs.environment }}" \
+            -detailed-exitcode -no-color > plan_output.txt 2>&1
           EXIT_CODE=$?
           echo "exitcode=$EXIT_CODE" >> $GITHUB_OUTPUT
           cat plan_output.txt
