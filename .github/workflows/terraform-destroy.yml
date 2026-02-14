@@ -1,0 +1,78 @@
+name: Destroy Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to destroy"
+        type: choice
+        options: [dev, preprod, prod]
+        default: dev
+      region:
+        description: "AWS Region (e.g., ap-south-1)"
+        required: true
+        default: "ap-south-1"
+        type: choice
+        options: [ap-south-1]
+
+env:
+  environment: ${{ inputs.environment }}
+  aws_region: ${{ inputs.region }}
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+    env:
+      TF_BUCKET: terraform-drift-005
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE}}
+          aws-region: ${{ inputs.region }}
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BUCKET}" \
+            -backend-config="key=${{ inputs.environment }}/${{ inputs.region }}/terraform.tfstate" \
+            -backend-config="region=${{ inputs.region }}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan Destroy
+        run: |
+          terraform plan -destroy \
+            -var-file=./stage_variable/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -var="aws_region=${{ inputs.region }}" \
+            -var="environment=${{ inputs.environment }}" \
+            -out=tfplan-destroy
+
+      - name: Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.MY_GITHUB_TOKEN }}
+          approvers: ${{ github.actor }}
+          minimum-approvals: 1
+          issue-title: "Destroying ${{ inputs.environment }} environment"
+          issue-body: "Please review the Terraform destroy plan and approve this destruction of ${{ inputs.environment }}."
+
+      - name: Terraform Destroy
+        run: terraform apply tfplan-destroy
