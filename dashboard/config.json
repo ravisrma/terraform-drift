@@ -1,0 +1,4 @@
+{
+  "title": "Terraform Drift Dashboard",
+  "environments": ["dev", "preprod", "prod"]
+}
