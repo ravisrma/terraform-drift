@@ -132,8 +132,12 @@ jobs:
         id: apply
         run: |
           echo "Applying Terraform changes to fix drift..."
-          terraform apply -auto-approve -no-color > apply_output.txt 2>&1
-        continue-on-error: true
+          terraform apply \
+            -var-file=./stage_variables/${{ inputs.environment }}/${{ inputs.region }}.tfvars \
+            -var="aws_region=${{ inputs.region }}" \
+            -var="environment=${{ inputs.environment }}" \
+            -auto-approve -no-color > apply_output.txt 2>&1
+        continue-on-error: true 
 
       - name: Show Apply Output on Failure
         if: steps.plan.outputs.exitcode == '2' && steps.apply.outcome == 'failure'
