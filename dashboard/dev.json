@@ -2,7 +2,7 @@
   "environment": "dev",
   "region": "ap-south-1",
   "status": "remediated",
-  "drift": "2",
+  "drift": "0",
   "apply_outcome": "success",
   "timestamp": "2026-02-14 17:25:24 IST",
   "workflow_run": "22016883225",
