@@ -1,13 +1,16 @@
 {
   "environment": "dev",
   "region": "ap-south-1",
-  "status": "remediated",
-  "drift": "0",
-  "apply_outcome": "success",
-  "timestamp": "2026-02-14 17:25:24 IST",
-  "workflow_run": "22016883225",
-  "workflow_url": "https://github.com/ravisrma/terraform-drift/actions/runs/22016883225",
+  "status": "clean",
+  "drift_count": "0",
+  "resources_to_add": "0",
+  "resources_to_change": "0",
+  "resources_to_destroy": "0",
+  "apply_outcome": "skipped",
+  "timestamp": "2026-02-22 04:26:03 IST",
+  "workflow_run": "22265958502",
+  "workflow_url": "https://github.com/ravisrma/terraform-drift/actions/runs/22265958502",
   "triggered_by": "ravisrma",
   "branch": "main",
-  "commit_sha": "742ddc6b63d44c2772098fc16c598705c722ecd2"
+  "commit_sha": "e2fd539df3ff400e6f5471eb2d27ff71dfd52aa8"
 }
